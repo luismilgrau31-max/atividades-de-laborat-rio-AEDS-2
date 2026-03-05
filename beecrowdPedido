@@ -1,0 +1,47 @@
+//classe principal
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+
+public class ProdutoPerecivel extends Produto{
+
+    private static final double DESCONTO = 0.25;
+    private static final int DIAS_DESCONTO = 7;
+
+    private LocalDate validade;
+
+    public ProdutoPerecivel(String descricao, double preco, double margem, LocalDate validade){
+        super(descricao, preco, margem);
+        this.validade = validade;
+    }
+
+    @Override
+    public double valorVenda(){
+
+        if(validade.isBefore(LocalDate.now())){
+            throw new IllegalStateException("Produto vencido");
+        }
+
+        double valor = super.valorVenda();
+
+        long dias = ChronoUnit.DAYS.between(LocalDate.now(), validade);
+
+        if(dias <= DIAS_DESCONTO){
+            valor = valor - (valor * DESCONTO);
+        }
+
+        return valor;
+    }
+
+    @Override
+    public String gerarDadosTexto(){
+
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        return "2;" + descricao + ";" +
+                String.format("%.2f",precoCusto) + ";" +
+                String.format("%.2f",margemLucro) + ";" +
+                validade.format(formato);
+    }
+
+}
