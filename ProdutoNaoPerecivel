@@ -1,0 +1,18 @@
+public class ProdutoNaoPerecivel extends Produto{
+
+    public ProdutoNaoPerecivel(String descricao, double preco, double margem){
+        super(descricao, preco, margem);
+    }
+
+    public ProdutoNaoPerecivel(String descricao, double preco){
+        super(descricao, preco);
+    }
+
+    @Override
+    public String gerarDadosTexto(){
+
+        return "1;" + descricao + ";" +
+                String.format("%.2f",precoCusto) + ";" +
+                String.format("%.2f",margemLucro);
+    }
+}
