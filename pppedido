@@ -1,0 +1,91 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+#define MAX_PRODUTOS 10
+#define DESCONTO_PG_A_VISTA 0.15
+
+typedef struct {
+    char descricao[100];
+    double precoCusto;
+    double margemLucro;
+    int quantidadeEmEstoque; // Tarefa 2.2
+} Produto;
+
+typedef struct {
+    Produto *produto;
+    int quantidade;
+    double precoVenda; // Tarefa 1.1: Preço congelado
+} ItemDePedido;
+
+typedef struct {
+    ItemDePedido itens[MAX_PRODUTOS];
+    int quantProdutos;
+    int formaDePagamento; // 1 para à vista
+} Pedido;
+
+// Tarefa 2.2: Redução de estoque
+bool reduzirEstoque(Produto *p, int quantidade) {
+    if (p->quantidadeEmEstoque >= quantidade) {
+        p->quantidadeEmEstoque -= quantidade;
+        return true;
+    }
+    return false;
+}
+
+// Tarefa 1.2: Implementação de igualdade
+bool saoIguais(ItemDePedido item, Produto *p) {
+    return item.produto == p;
+}
+
+double calcularValorFinal(Pedido *p) {
+    double total = 0;
+    for (int i = 0; i < p->quantProdutos; i++) {
+        total += p->itens[i].precoVenda * p->itens[i].quantidade;
+    }
+    if (p->formaDePagamento == 1) {
+        total -= (total * DESCONTO_PG_A_VISTA);
+    }
+    return total;
+}
+
+// Tarefa 2.3: Inclusão Inteligente
+void incluirProduto(Pedido *ped, Produto *prod, int qtd) {
+    for (int i = 0; i < ped->quantProdutos; i++) {
+        if (saoIguais(ped->itens[i], prod)) {
+            int opcao;
+            scanf("%d", &opcao); 
+            if (opcao == 1) {
+                if (reduzirEstoque(prod, qtd)) {
+                    ped->itens[i].quantidade += qtd;
+                }
+            }
+            return;
+        }
+    }
+
+    if (ped->quantProdutos < MAX_PRODUTOS) {
+        if (reduzirEstoque(prod, qtd)) {
+            ItemDePedido novo;
+            novo.produto = prod;
+            novo.quantidade = qtd;
+            // Congela o preço no momento da venda (Custo * (1 + Margem))
+            novo.precoVenda = prod->precoCusto * (1 + prod->margemLucro);
+            ped->itens[ped->quantProdutos] = novo;
+            ped->quantProdutos++;
+        }
+    }
+}
+
+int main() {
+    // Exemplo de inicialização conforme o novo formato de arquivo (Tarefa 2.1)
+    Produto p1 = {"Produto Exemplo", 100.0, 0.50, 50}; 
+    Pedido ped = {.quantProdutos = 0, .formaDePagamento = 1};
+
+    incluirProduto(&ped, &p1, 5);
+    
+    printf("%.2f\n", calcularValorFinal(&ped));
+
+    return 0;
+}
